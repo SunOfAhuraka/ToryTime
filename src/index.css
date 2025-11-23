@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* 1. Primary Background: Soft Coral */
+  --color-brand-bg: #F6C7B6;
+
+  /* 2. Soft Card Background: Warm Beige */
+  --color-brand-card: #F7EDE2;
+
+  /* 3. Primary Accent: Vibrant Soft Orange (Buttons/Actions) */
+  --color-brand-primary: #F28C38;
+
+  /* 4. Secondary Accent: Aqua Blue (Icons) */
+  --color-brand-secondary: #5EC4D0;
+
+  /* Text Color: Dark Grey */
+  --color-brand-text: #4A4A4A;
+
+  /* Typography */
+  --font-sans: "Nunito", sans-serif;
+}
+
+/* Custom Utilities for Animations */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Global Base Styles */
+body {
+  font-family: var(--font-sans);
+  color: var(--color-brand-text);
+  background-color: var(--color-brand-bg);
+  margin: 0;
+  min-height: 100vh;
+}
