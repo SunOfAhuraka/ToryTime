@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
-import { PARENT_DATABASE } from "../data/mockData";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -9,28 +9,54 @@ export const AuthProvider = ({ children }) => {
   const [parentData, setParentData] = useState(null);
   const [activeProfile, setActiveProfile] = useState(null);
   const [isParentMode, setIsParentMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const login = (email, password) => {
-    // 1. Check for Admin Login
-    if (email === "admin@storytime.com" && password === "admin123") {
-      setIsAuthenticated(true);
-      setIsAdmin(true);
-      setParentData({ name: "Super Admin" });
-      return true;
-    }
+  // Check for existing token on reload
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        try {
+          // Try to fetch profile with existing token
+          const profile = await api.getProfile();
+          setParentData(profile);
+          setIsAuthenticated(true);
+        } catch (err) {
+          // Token expired or invalid
+          localStorage.removeItem('access_token');
+        }
+      }
+      setLoading(false);
+    };
+    initAuth();
+  }, []);
 
-    // 2. Check for Parent Login
-    const parent = PARENT_DATABASE[email];
-    if (parent && parent.password === password) {
+  const login = async (email, password) => {
+    try {
+      // 1. Admin Hardcoded Check (Optional, or move to backend)
+      if (email === "admin@storytime.com" && password === "admin123") {
+        setIsAuthenticated(true);
+        setIsAdmin(true);
+        setParentData({ name: "Super Admin", children: [] });
+        return true;
+      }
+
+      // 2. Real Backend Login
+      const profile = await api.login({ username: email, password }); // Django usually expects 'username'
+      
+      setParentData(profile);
       setIsAuthenticated(true);
       setIsAdmin(false);
-      setParentData({ ...parent });
       return true;
+    } catch (error) {
+      console.error("Login failed", error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     setIsAuthenticated(false);
     setParentData(null);
     setActiveProfile(null);
@@ -38,66 +64,27 @@ export const AuthProvider = ({ children }) => {
     setIsAdmin(false);
   };
 
-  // --- MISSING FUNCTIONS ADDED BELOW ---
-
-  const selectProfile = (profile, mode = "child") => {
+  const selectProfile = (profile, mode = 'child') => {
     setActiveProfile(profile);
-    setIsParentMode(mode === "parent");
+    setIsParentMode(mode === 'parent');
   };
 
-  const addChild = (childData) => {
-    setParentData((prev) => ({
-      ...prev,
-      children: [
-        ...prev.children,
-        {
-          ...childData,
-          id: `child_${Date.now()}`,
-        },
-      ],
-    }));
+  const addChild = async (childData) => {
+    try {
+      const newChild = await api.createChild(childData);
+      setParentData(prev => ({
+        ...prev,
+        children: [...prev.children, newChild]
+      }));
+    } catch (err) {
+      console.error("Failed to add child", err);
+    }
   };
 
-  const addRecording = (childId, storyId, blobUrl) => {
-    setParentData((prev) => ({
-      ...prev,
-      recordings: {
-        ...prev.recordings,
-        [childId]: {
-          ...prev.recordings[childId],
-          [storyId]: { blobUrl, recordedAt: new Date().toISOString() },
-        },
-      },
-    }));
-  };
-
-  const addCustomStory = (story) => {
-    setParentData((prev) => ({
-      ...prev,
-      customStories: [
-        ...prev.customStories,
-        {
-          ...story,
-          id: `custom_${Date.now()}`,
-          author: prev.name,
-        },
-      ],
-    }));
-  };
-
-  const saveQuizScore = (childId, storyId, score, total) => {
-    setParentData((prev) => ({
-      ...prev,
-      quizScores: {
-        ...prev.quizScores,
-        [`${childId}_${storyId}`]: {
-          score,
-          total,
-          date: new Date().toISOString(),
-        },
-      },
-    }));
-  };
+  // Stub functions - These can be expanded to use API later
+  const addRecording = () => {}; 
+  const addCustomStory = () => {};
+  const saveQuizScore = () => {};
 
   return (
     <AuthContext.Provider
@@ -109,14 +96,15 @@ export const AuthProvider = ({ children }) => {
         isParentMode,
         login,
         logout,
-        selectProfile, // Now defined above
-        addChild, // Now defined above
-        addRecording, // Now defined above
-        addCustomStory, // Now defined above
-        saveQuizScore, // Now defined above
+        selectProfile,
+        addChild,
+        addRecording,
+        addCustomStory,
+        saveQuizScore,
+        loading
       }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
