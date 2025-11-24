@@ -1,82 +1,55 @@
 import React, { useState } from "react";
-import { BookOpen } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { api } from "../../api/client";
+import Button from "../../components/ui/Button";
 
-const LoginPage = () => {
-  const [email, setEmail] = useState("parent@storytime.com");
-  const [password, setPassword] = useState("demo");
+const LoginPage = ({ setIsAuthenticated, setIsAdmin }) => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login } = useAuth();
 
-  const handleSubmit = () => {
-    if (login(email, password)) {
-      setError("");
-    } else {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.login({ username, password });
+      localStorage.setItem("access_token", res.data.access);
+      setIsAuthenticated(true);
+
+      // Check Admin status based on username for MVP or decoded token
+      const isAdmin = username.includes("admin");
+      setIsAdmin(isAdmin);
+      navigate(isAdmin ? "/admin" : "/profiles");
+    } catch (err) {
       setError("Invalid credentials");
     }
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: "#F6C7B6" }}
-    >
-      <div
-        className="w-full max-w-md p-8 rounded-2xl shadow-xl"
-        style={{ backgroundColor: "#F7EDE2" }}
-      >
-        <div className="text-center mb-8">
-          <BookOpen
-            className="w-16 h-16 mx-auto mb-4"
-            style={{ color: "#F28C38" }}
+    <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6">
+      <div className="bg-brand-card p-10 rounded-3xl shadow-2xl w-full max-w-md">
+        <h2 className="text-3xl font-bold text-center mb-8 text-brand-primary">
+          Welcome Back
+        </h2>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            className="w-full p-4 rounded-xl border-2 border-white bg-white"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
-          <h1 className="text-3xl font-bold" style={{ color: "#F28C38" }}>
-            StoryTime
-          </h1>
-          <p className="text-gray-600 mt-2">Where stories come alive</p>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-              className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-opacity-50"
-              style={{ borderColor: "#5EC4D0", backgroundColor: "white" }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-              className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-opacity-50"
-              style={{ borderColor: "#5EC4D0", backgroundColor: "white" }}
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-
-          <button
-            onClick={handleSubmit}
-            className="w-full py-3 rounded-lg font-semibold text-white transition-transform hover:scale-105"
-            style={{ backgroundColor: "#F28C38" }}
-          >
-            Sign In
-          </button>
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg text-sm">
-          <p className="font-semibold mb-2">Demo Accounts:</p>
-          <p>• parent@storytime.com / demo</p>
-          <p>• john@storytime.com / demo123</p>
-        </div>
+          <input
+            className="w-full p-4 rounded-xl border-2 border-white bg-white"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && <p className="text-red-500 text-center">{error}</p>}
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+        </form>
       </div>
     </div>
   );

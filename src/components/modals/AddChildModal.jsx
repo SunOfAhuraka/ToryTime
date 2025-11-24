@@ -1,101 +1,55 @@
 import React, { useState } from "react";
+import { api } from "../../api/client";
 
-const AddChildModal = ({ onClose, onAdd }) => {
+const AddChildModal = ({ onClose, onChildAdded }) => {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("👶");
-  const [color, setColor] = useState("#FF6B9D");
+  const avatars = ["👶", "👧", "👦", "🐻", "🦁"];
 
-  const avatars = ["👶", "👧", "👦", "🧒", "👨", "👩", "🐻", "🐱", "🐶", "🦁"];
-  const colors = [
-    "#FF6B9D",
-    "#4A90E2",
-    "#9B59B6",
-    "#E74C3C",
-    "#F39C12",
-    "#27AE60",
-    "#16A085",
-    "#8E44AD",
-  ];
-
-  const handleAdd = () => {
-    if (name.trim()) {
-      onAdd({ name: name.trim(), avatar, color });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.createChild({ name, avatar, color: "#FF6B9D" });
+      onChildAdded(); // Refresh parent list
       onClose();
+    } catch (err) {
+      alert("Failed to add child");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div
-        className="p-8 rounded-2xl max-w-md w-full"
-        style={{ backgroundColor: "#F7EDE2" }}
-      >
-        <h2 className="text-2xl font-bold mb-6">Add New Child</h2>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border-2"
-              style={{ borderColor: "#5EC4D0" }}
-              placeholder="Enter child's name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Choose Avatar
-            </label>
-            <div className="grid grid-cols-5 gap-2">
-              {avatars.map((av) => (
-                <button
-                  key={av}
-                  onClick={() => setAvatar(av)}
-                  className={`p-3 rounded-lg text-2xl transition-all ${
-                    avatar === av ? "scale-110" : ""
-                  }`}
-                  style={{ backgroundColor: avatar === av ? color : "#ffffff" }}
-                >
-                  {av}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Choose Color
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              {colors.map((col) => (
-                <button
-                  key={col}
-                  onClick={() => setColor(col)}
-                  className={`h-12 rounded-lg transition-all ${
-                    color === col ? "scale-110 ring-4 ring-offset-2" : ""
-                  }`}
-                  style={{ backgroundColor: col, ringColor: col }}
-                />
-              ))}
-            </div>
-          </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-brand-card p-8 rounded-3xl max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">Add Child</h2>
+        <input
+          className="w-full p-3 rounded-xl border-2 mb-4"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <div className="flex gap-2 mb-6">
+          {avatars.map((a) => (
+            <button
+              key={a}
+              onClick={() => setAvatar(a)}
+              className={`p-2 text-2xl rounded-lg ${
+                avatar === a ? "bg-white shadow" : ""
+              }`}
+            >
+              {a}
+            </button>
+          ))}
         </div>
-
-        <div className="flex gap-4 mt-6">
+        <div className="flex gap-2">
           <button
-            onClick={handleAdd}
-            className="flex-1 py-3 rounded-lg text-white font-semibold"
-            style={{ backgroundColor: "#F28C38" }}
+            onClick={handleSubmit}
+            className="flex-1 bg-brand-primary text-white py-3 rounded-xl font-bold"
           >
-            Add Child
+            Add
           </button>
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-lg font-semibold"
-            style={{ backgroundColor: "#5EC4D0", color: "white" }}
+            className="flex-1 bg-gray-200 py-3 rounded-xl font-bold"
           >
             Cancel
           </button>

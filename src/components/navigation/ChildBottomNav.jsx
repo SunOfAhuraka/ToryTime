@@ -1,78 +1,36 @@
 import React from "react";
-import { BookOpen, Headphones, Camera, Settings } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { BookOpen, Headphones, Camera, Settings, LogOut } from "lucide-react";
 
-const ChildBottomNav = ({ activeTab = "read", onTabChange = () => {} }) => {
-  const { logout } = useAuth();
+const ChildBottomNav = ({ activeTab, onTabChange }) => {
+  const handleLogout = () => {
+    if (window.confirm("Exit to profile selection?")) {
+      window.location.href = "/profiles";
+    }
+  };
+
+  const NavItem = ({ id, icon: Icon, label }) => (
+    <button
+      onClick={() => onTabChange(id)}
+      className={`flex flex-col items-center gap-1 ${
+        activeTab === id ? "text-brand-primary" : "text-gray-400"
+      }`}
+    >
+      <Icon className="w-6 h-6" />
+      <span className="text-[10px] font-bold uppercase">{label}</span>
+    </button>
+  );
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 p-4 flex justify-around items-center shadow-lg"
-      style={{ backgroundColor: "#F7EDE2" }}
-    >
+    <div className="fixed bottom-0 left-0 right-0 p-4 flex justify-around items-center bg-brand-card rounded-t-3xl shadow-xl z-50">
+      <NavItem id="read" icon={BookOpen} label="Read" />
+      <NavItem id="listen" icon={Headphones} label="Listen" />
+      <NavItem id="studio" icon={Camera} label="Studio" />
       <button
-        onClick={() => onTabChange("read")}
-        className="flex flex-col items-center gap-1"
+        onClick={handleLogout}
+        className="flex flex-col items-center gap-1 text-gray-400 hover:text-red-500"
       >
-        <BookOpen
-          className="w-6 h-6"
-          style={{ color: activeTab === "read" ? "#F28C38" : "#5EC4D0" }}
-        />
-        <span
-          className={`text-xs font-medium ${
-            activeTab === "read" ? "text-gray-800" : "text-gray-600"
-          }`}
-        >
-          Read
-        </span>
-      </button>
-      <button
-        onClick={() => onTabChange("listen")}
-        className="flex flex-col items-center gap-1"
-      >
-        <Headphones
-          className="w-6 h-6"
-          style={{ color: activeTab === "listen" ? "#F28C38" : "#5EC4D0" }}
-        />
-        <span
-          className={`text-xs font-medium ${
-            activeTab === "listen" ? "text-gray-800" : "text-gray-600"
-          }`}
-        >
-          Listen
-        </span>
-      </button>
-      <button
-        onClick={() => onTabChange("studio")}
-        className="flex flex-col items-center gap-1"
-      >
-        <Camera
-          className="w-6 h-6"
-          style={{ color: activeTab === "studio" ? "#F28C38" : "#5EC4D0" }}
-        />
-        <span
-          className={`text-xs font-medium ${
-            activeTab === "studio" ? "text-gray-800" : "text-gray-600"
-          }`}
-        >
-          Studio
-        </span>
-      </button>
-      <button
-        onClick={() => onTabChange("settings")}
-        className="flex flex-col items-center gap-1"
-      >
-        <Settings
-          className="w-6 h-6"
-          style={{ color: activeTab === "settings" ? "#F28C38" : "#5EC4D0" }}
-        />
-        <span
-          className={`text-xs font-medium ${
-            activeTab === "settings" ? "text-gray-800" : "text-gray-600"
-          }`}
-        >
-          Settings
-        </span>
+        <LogOut className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase">Exit</span>
       </button>
     </div>
   );

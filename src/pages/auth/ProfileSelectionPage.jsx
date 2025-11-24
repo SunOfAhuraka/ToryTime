@@ -1,109 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../../api/client";
 import { Lock } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 
-const ProfileSelectionPage = () => {
-  const { parentData, selectProfile } = useAuth();
-  const [showPinModal, setShowPinModal] = useState(false);
-  const [pin, setPin] = useState("");
+const ProfileSelectionPage = ({ setActiveProfile }) => {
+  const navigate = useNavigate();
+  const [children, setChildren] = useState([]);
 
-  const handleParentAccess = () => {
-    if (pin === "1234") {
-      selectProfile(null, "parent");
-      setShowPinModal(false);
-      setPin("");
-    } else {
-      alert("Incorrect PIN. Try: 1234");
-    }
+  useEffect(() => {
+    api
+      .getChildren()
+      .then((res) => setChildren(res.data))
+      .catch(() => {});
+  }, []);
+
+  const handleSelect = (child) => {
+    setActiveProfile(child);
+    // Persist active profile to survive refresh
+    localStorage.setItem("active_profile", JSON.stringify(child));
+    navigate("/app/stories");
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-8"
-      style={{ backgroundColor: "#F6C7B6" }}
-    >
+    <div className="min-h-screen bg-brand-bg flex items-center justify-center p-8">
       <div className="w-full max-w-4xl">
-        <h1
-          className="text-4xl font-bold text-center mb-12"
-          style={{ color: "#F28C38" }}
-        >
-          Who's Reading?
+        <h1 className="text-4xl font-bold text-center mb-12 text-white">
+          Who is reading?
         </h1>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-          {parentData?.children.map((child) => (
-            <button
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 justify-center">
+          {children.map((child) => (
+            <div
               key={child.id}
-              onClick={() => selectProfile(child, "child")}
-              className="flex flex-col items-center p-6 rounded-2xl transition-transform hover:scale-105"
-              style={{ backgroundColor: "#F7EDE2" }}
+              onClick={() => handleSelect(child)}
+              className="flex flex-col items-center cursor-pointer group hover:scale-110 transition"
             >
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-4"
-                style={{ backgroundColor: child.color }}
-              >
+              <div className="w-32 h-32 bg-brand-card rounded-full flex items-center justify-center text-6xl shadow-lg mb-4 border-4 border-white">
                 {child.avatar}
               </div>
-              <span className="text-xl font-semibold">{child.name}</span>
-            </button>
+              <span className="text-xl font-bold text-white">{child.name}</span>
+            </div>
           ))}
-
-          <button
-            onClick={() => setShowPinModal(true)}
-            className="flex flex-col items-center p-6 rounded-2xl transition-transform hover:scale-105"
-            style={{ backgroundColor: "#F7EDE2" }}
-          >
-            <div
-              className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "#5EC4D0" }}
-            >
-              <Lock className="w-12 h-12 text-white" />
-            </div>
-            <span className="text-xl font-semibold">Parent</span>
-          </button>
-        </div>
-      </div>
-
-      {showPinModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div
-            className="p-8 rounded-2xl max-w-sm w-full"
-            style={{ backgroundColor: "#F7EDE2" }}
+            onClick={() => navigate("/dashboard")}
+            className="flex flex-col items-center cursor-pointer group hover:scale-110 transition"
           >
-            <h2 className="text-2xl font-bold mb-4">Enter PIN</h2>
-            <input
-              type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border-2 mb-4"
-              style={{ borderColor: "#5EC4D0" }}
-              placeholder="Enter 4-digit PIN"
-            />
-            <div className="flex gap-4">
-              <button
-                onClick={handleParentAccess}
-                className="flex-1 py-3 rounded-lg text-white font-semibold"
-                style={{ backgroundColor: "#F28C38" }}
-              >
-                Unlock
-              </button>
-              <button
-                onClick={() => {
-                  setShowPinModal(false);
-                  setPin("");
-                }}
-                className="flex-1 py-3 rounded-lg font-semibold"
-                style={{ backgroundColor: "#5EC4D0", color: "white" }}
-              >
-                Cancel
-              </button>
+            <div className="w-32 h-32 bg-brand-secondary rounded-full flex items-center justify-center text-white shadow-lg mb-4">
+              <Lock size={40} />
             </div>
-            <p className="text-sm text-gray-500 mt-4 text-center">
-              Demo PIN: 1234
-            </p>
+            <span className="text-xl font-bold text-white">Parent</span>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
