@@ -7,27 +7,34 @@ const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach Token to every request
+// Attach Token to every request EXCEPT auth endpoints
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("access_token");
-  if (token) {
+
+  // Check if the URL is for login or register
+  const isAuthRequest =
+    config.url.includes("/auth/login/") ||
+    config.url.includes("/auth/register/");
+
+  if (token && !isAuthRequest) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
 export const api = {
   login: (credentials) => apiClient.post("/auth/login/", credentials),
 
+  // Registration
+  register: (userData) => apiClient.post("/auth/register/", userData),
+
   // Fetch the current user's details
   getProfile: async () => {
-    // Assuming backend endpoint exists or filtering users.
-    // For now, returning mock structure if backend isn't fully ready
     try {
       const res = await apiClient.get("/users/me/");
       return res.data;
     } catch (e) {
-      // Fallback for prototype
       return { is_staff: localStorage.getItem("user_role") === "admin" };
     }
   },

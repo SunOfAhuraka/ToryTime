@@ -49,6 +49,18 @@ const LoginPage = ({ setIsAuthenticated, setIsAdmin }) => {
           <Button type="submit" className="w-full">
             Login
           </Button>
+
+          <div className="mt-4 pt-5 border-t border-gray-100 text-center">
+            <p className="text-gray-400 text-sm">
+              Do not have an account?{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="text-[#F28C38] font-bold hover:underline"
+              >
+                Register here
+              </button>
+            </p>
+          </div>
         </form>
       </div>
     </div>

@@ -13,6 +13,7 @@ import AppLayout from "./components/layout/AppLayout";
 import ChildLibraryView from "./pages/child/ChildLibraryView";
 import StoryReadingPage from "./pages/child/StoryReadingPage";
 import CustomStoryCreator from "./components/modals/CustomStoryCreator";
+import RegisterPage from "./pages/auth/RegisterPage";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,6 +62,16 @@ const App = () => {
         path="/login"
         element={
           <LoginPage
+            setIsAuthenticated={setIsAuthenticated}
+            setIsAdmin={setIsAdmin}
+          />
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <RegisterPage
             setIsAuthenticated={setIsAuthenticated}
             setIsAdmin={setIsAdmin}
           />

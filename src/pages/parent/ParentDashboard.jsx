@@ -10,19 +10,19 @@ import {
   FileText,
   Award,
 } from "lucide-react";
-import { api } from "../../api/client"; // Import the API client
+import { api } from "../../api/client";
 import AddChildModal from "../../components/modals/AddChildModal";
 import CustomStoryCreator from "../../components/modals/CustomStoryCreator";
 
 const ParentDashboard = () => {
   const navigate = useNavigate();
 
-  // Local State to hold data from Backend
+  // Data State
   const [parentName, setParentName] = useState("");
   const [children, setChildren] = useState([]);
   const [customStories, setCustomStories] = useState([]);
   const [globalStories, setGlobalStories] = useState([]);
-  const [quizScores, setQuizScores] = useState({}); // Assuming backend returns this map
+  const [quizScores, setQuizScores] = useState({});
 
   // UI State
   const [showAddChild, setShowAddChild] = useState(false);
@@ -30,12 +30,12 @@ const ParentDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
 
-  // 1. Fetch Data on Mount
+  // 1. Fetch Data
   const loadDashboardData = async () => {
     try {
       setLoading(true);
 
-      // Fetch Profile (for name)
+      // Fetch Profile
       const profile = await api.getProfile();
       setParentName(profile.name || "Parent");
 
@@ -43,28 +43,26 @@ const ParentDashboard = () => {
       const childrenRes = await api.getChildren();
       setChildren(childrenRes.data);
 
-      // Fetch All Stories and separate them
+      // Fetch Stories
       const storiesRes = await api.getStories();
       const allStories = storiesRes.data;
 
-      // Separate Global vs Custom (Assuming 'is_global' flag or check author)
-      // Adjust logic based on your exact backend response structure
-      const custom = allStories.filter(
+      // Filter Stories (Logic: Author is Me vs Author is Admin/Others)
+      const myStories = allStories.filter(
         (s) => s.author === profile.name || s.category === "Personal"
       );
-      const global = allStories.filter(
+      const libraryStories = allStories.filter(
         (s) => s.author !== profile.name && s.category !== "Personal"
       );
 
-      setCustomStories(custom);
-      setGlobalStories(global);
+      setCustomStories(myStories);
+      setGlobalStories(libraryStories);
 
-      // If backend provides quiz scores in profile, set them here
       if (profile.quizScores) {
         setQuizScores(profile.quizScores);
       }
     } catch (error) {
-      console.error("Failed to load dashboard", error);
+      console.error("Failed to load dashboard data", error);
     } finally {
       setLoading(false);
     }
@@ -74,7 +72,7 @@ const ParentDashboard = () => {
     loadDashboardData();
   }, []);
 
-  // 2. Handlers replacing Context functions
+  // 2. Actions
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
@@ -82,25 +80,19 @@ const ParentDashboard = () => {
   };
 
   const selectProfile = (child) => {
-    // Save selected child to storage so ChildLibrary can read it
     localStorage.setItem("active_profile", JSON.stringify(child));
     navigate("/app/stories");
   };
 
-  const handleAddChild = async (childData) => {
-    try {
-      // The Modal calls the API, we just reload data here to be safe
-      // Or we can manually update state to avoid a reload
-      await loadDashboardData();
-      setShowAddChild(false);
-    } catch (e) {
-      console.error(e);
-    }
+  // --- FIX IS HERE ---
+  // The modal handles the API call. We just need to reload the list when it's done.
+  const handleChildAdded = async () => {
+    await loadDashboardData(); // Refresh the list from backend
+    setShowAddChild(false);
   };
 
-  const handleAddStory = async (story) => {
-    // CustomStoryCreator handles the API call internally, we just refresh
-    await loadDashboardData();
+  const handleStorySaved = async () => {
+    await loadDashboardData(); // Refresh the list from backend
     setShowStoryCreator(false);
   };
 
@@ -130,7 +122,7 @@ const ParentDashboard = () => {
           </div>
           <button
             onClick={logout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-white transition-transform hover:scale-105"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-white transition hover:opacity-90"
             style={{ backgroundColor: "#5EC4D0" }}
           >
             <LogOut className="w-4 h-4" />
@@ -142,7 +134,7 @@ const ParentDashboard = () => {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-6 py-3 rounded-lg font-semibold transition ${
               activeTab === "overview"
                 ? "text-white"
                 : "text-gray-600 hover:bg-orange-100"
@@ -155,7 +147,7 @@ const ParentDashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab("stories")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-6 py-3 rounded-lg font-semibold transition ${
               activeTab === "stories"
                 ? "text-white"
                 : "text-gray-600 hover:bg-orange-100"
@@ -168,7 +160,7 @@ const ParentDashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab("progress")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-6 py-3 rounded-lg font-semibold transition ${
               activeTab === "progress"
                 ? "text-white"
                 : "text-gray-600 hover:bg-orange-100"
@@ -181,28 +173,26 @@ const ParentDashboard = () => {
           </button>
         </div>
 
-        {/* Content: Overview */}
+        {/* Overview Tab */}
         {activeTab === "overview" && (
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Children Card */}
             <div
               className="p-6 rounded-2xl shadow-lg"
               style={{ backgroundColor: "#F7EDE2" }}
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold flex items-center gap-2 text-[#4A4A4A]">
-                  <Users style={{ color: "#F28C38" }} />
-                  Your Children
+                  <Users style={{ color: "#F28C38" }} /> Your Children
                 </h2>
                 <button
                   onClick={() => setShowAddChild(true)}
-                  className="px-3 py-2 rounded-lg text-white text-sm flex items-center gap-2 transition hover:opacity-90"
+                  className="px-3 py-2 rounded-lg text-white text-sm flex items-center gap-2 hover:opacity-90"
                   style={{ backgroundColor: "#F28C38" }}
                 >
-                  <Plus className="w-4 h-4" />
-                  Add Child
+                  <Plus className="w-4 h-4" /> Add Child
                 </button>
               </div>
+
               <div className="space-y-3">
                 {children.length === 0 ? (
                   <p className="text-gray-500 text-center py-4">
@@ -227,7 +217,7 @@ const ParentDashboard = () => {
                       </div>
                       <button
                         onClick={() => selectProfile(child)}
-                        className="px-4 py-2 rounded-lg text-sm text-white transition hover:opacity-90"
+                        className="px-4 py-2 rounded-lg text-sm text-white hover:opacity-90"
                         style={{ backgroundColor: "#5EC4D0" }}
                       >
                         View Profile
@@ -238,69 +228,41 @@ const ParentDashboard = () => {
               </div>
             </div>
 
-            {/* Quick Actions Card */}
             <div
               className="p-6 rounded-2xl shadow-lg"
               style={{ backgroundColor: "#F7EDE2" }}
             >
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-[#4A4A4A]">
-                <Sparkles style={{ color: "#F28C38" }} />
-                Quick Actions
+                <Sparkles style={{ color: "#F28C38" }} /> Quick Actions
               </h2>
               <div className="space-y-3">
-                <button
+                <ActionCard
                   onClick={() => setShowStoryCreator(true)}
-                  className="w-full p-4 rounded-lg bg-white text-left hover:shadow-md transition-all transform hover:-translate-y-1"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText
-                      className="w-6 h-6"
-                      style={{ color: "#F28C38" }}
-                    />
-                    <div>
-                      <p className="font-semibold text-[#4A4A4A]">
-                        Create Custom Story
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Write a personalized tale
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                <button className="w-full p-4 rounded-lg bg-white text-left hover:shadow-md transition-all transform hover:-translate-y-1">
-                  <div className="flex items-center gap-3">
-                    <Mic className="w-6 h-6" style={{ color: "#5EC4D0" }} />
-                    <div>
-                      <p className="font-semibold text-[#4A4A4A]">
-                        Recording Studio
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Add your voice to stories
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                <button className="w-full p-4 rounded-lg bg-white text-left hover:shadow-md transition-all transform hover:-translate-y-1">
-                  <div className="flex items-center gap-3">
-                    <Award className="w-6 h-6" style={{ color: "#F28C38" }} />
-                    <div>
-                      <p className="font-semibold text-[#4A4A4A]">
-                        View Quiz Results
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Check children's progress
-                      </p>
-                    </div>
-                  </div>
-                </button>
+                  icon={FileText}
+                  iconColor="#F28C38"
+                  title="Create Custom Story"
+                  desc="Write a personalized tale"
+                />
+                <ActionCard
+                  onClick={() => alert("Recording Studio coming soon!")}
+                  icon={Mic}
+                  iconColor="#5EC4D0"
+                  title="Recording Studio"
+                  desc="Add your voice to stories"
+                />
+                <ActionCard
+                  onClick={() => setActiveTab("progress")}
+                  icon={Award}
+                  iconColor="#F28C38"
+                  title="View Quiz Results"
+                  desc="Check children's progress"
+                />
               </div>
             </div>
           </div>
         )}
 
-        {/* Content: Stories */}
+        {/* Stories Tab */}
         {activeTab === "stories" && (
           <div
             className="p-6 rounded-2xl shadow-lg"
@@ -312,173 +274,127 @@ const ParentDashboard = () => {
               </h2>
               <button
                 onClick={() => setShowStoryCreator(true)}
-                className="px-4 py-3 rounded-lg text-white font-semibold flex items-center gap-2 transition hover:opacity-90"
+                className="px-4 py-3 rounded-lg text-white font-semibold flex items-center gap-2 hover:opacity-90"
                 style={{ backgroundColor: "#F28C38" }}
               >
-                <Plus className="w-5 h-5" />
-                Create New Story
+                <Plus className="w-5 h-5" /> Create New Story
               </button>
             </div>
 
-            {customStories.length > 0 ? (
-              <div className="grid md:grid-cols-3 gap-4">
-                {customStories.map((story) => (
-                  <div
-                    key={story.id}
-                    className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition"
-                  >
-                    {story.coverImage ? (
-                      <img
-                        src={story.coverImage}
-                        alt={story.title}
-                        className="w-full h-40 object-cover rounded-lg mb-3"
-                      />
-                    ) : (
-                      <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 flex items-center justify-center text-gray-400">
-                        No Image
-                      </div>
-                    )}
-                    <h3 className="font-semibold mb-1 text-[#4A4A4A]">
-                      {story.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">{story.category}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-600">
-                  No custom stories yet. Create your first one!
-                </p>
-              </div>
-            )}
+            <div className="grid md:grid-cols-3 gap-4 mb-8">
+              {customStories.length > 0 ? (
+                customStories.map((story) => (
+                  <StoryCard key={story.id} story={story} />
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-8 text-gray-500">
+                  No custom stories yet.
+                </div>
+              )}
+            </div>
 
-            <div
-              className="mt-8 border-t-2 pt-8"
-              style={{ borderColor: "#5EC4D0" }}
-            >
-              <h2 className="text-xl font-bold mb-4 text-[#4A4A4A]">
-                Global Library
-              </h2>
-              <div className="grid md:grid-cols-3 gap-4">
-                {globalStories.map((story) => (
-                  <div
-                    key={story.id}
-                    className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition"
-                  >
-                    {story.coverImage ? (
-                      <img
-                        src={story.coverImage}
-                        alt={story.title}
-                        className="w-full h-40 object-cover rounded-lg mb-3"
-                      />
-                    ) : (
-                      <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 flex items-center justify-center text-gray-400">
-                        No Image
-                      </div>
-                    )}
-                    <h3 className="font-semibold mb-1 text-[#4A4A4A]">
-                      {story.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {story.author || "Admin"}
-                    </p>
-                  </div>
-                ))}
-              </div>
+            <h2 className="text-xl font-bold mb-4 text-[#4A4A4A] pt-6 border-t-2 border-[#5EC4D0]">
+              Global Library
+            </h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {globalStories.map((story) => (
+                <StoryCard key={story.id} story={story} />
+              ))}
             </div>
           </div>
         )}
 
-        {/* Content: Progress */}
+        {/* Progress Tab */}
         {activeTab === "progress" && (
           <div
             className="p-6 rounded-2xl shadow-lg"
             style={{ backgroundColor: "#F7EDE2" }}
           >
             <h2 className="text-xl font-bold mb-6 text-[#4A4A4A]">
-              Children's Quiz Progress
+              Quiz Progress
             </h2>
-
             {children.length === 0 && (
-              <p className="text-gray-500">No children profiles to show.</p>
+              <p className="text-gray-500">No children profiles.</p>
             )}
-
-            {children.map((child) => {
-              // Filtering logic based on quizScores structure
-              const childScores = Object.entries(quizScores || {}).filter(
-                ([key]) => key.startsWith(`${child.id}_`)
-              );
-
-              return (
-                <div
-                  key={child.id}
-                  className="mb-6 p-4 bg-white rounded-lg shadow-sm"
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-xl border shadow-sm"
-                      style={{ backgroundColor: child.color || "#FF6B9D" }}
-                    >
-                      {child.avatar}
-                    </div>
-                    <h3 className="font-bold text-lg text-[#4A4A4A]">
-                      {child.name}
-                    </h3>
+            {children.map((child) => (
+              <div
+                key={child.id}
+                className="mb-6 p-4 bg-white rounded-lg shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+                    style={{ backgroundColor: child.color || "#FF6B9D" }}
+                  >
+                    {child.avatar}
                   </div>
-
-                  {childScores.length > 0 ? (
-                    <div className="space-y-2">
-                      {childScores.map(([key, data]) => {
-                        const storyId = key.split("_")[1];
-                        // Find story in either list to get the title
-                        const story = [...globalStories, ...customStories].find(
-                          (s) => s.id == storyId
-                        );
-                        return (
-                          <div
-                            key={key}
-                            className="flex justify-between items-center p-3 bg-gray-50 rounded"
-                          >
-                            <span className="font-medium text-[#4A4A4A]">
-                              {story?.title || "Unknown Story"}
-                            </span>
-                            <span
-                              className="text-sm font-bold"
-                              style={{ color: "#F28C38" }}
-                            >
-                              {data.score}/{data.total}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-sm">No quiz results yet</p>
-                  )}
+                  <h3 className="font-bold text-lg text-[#4A4A4A]">
+                    {child.name}
+                  </h3>
                 </div>
-              );
-            })}
+                {/* Mock progress logic - replace with real score mapping */}
+                <p className="text-sm text-gray-500">
+                  No recent activity recorded.
+                </p>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Modals */}
+      {/* Modals with CORRECT props */}
       {showAddChild && (
         <AddChildModal
           onClose={() => setShowAddChild(false)}
-          onAdd={handleAddChild}
+          onChildAdded={handleChildAdded} // <--- FIXED: Matching the prop name in AddChildModal
         />
       )}
       {showStoryCreator && (
         <CustomStoryCreator
           onClose={() => setShowStoryCreator(false)}
-          onSave={handleAddStory}
+          onSave={handleStorySaved} // Ensures list refresh after creation
         />
       )}
     </div>
   );
 };
+
+// Helper Components
+const ActionCard = ({ onClick, icon: Icon, iconColor, title, desc }) => (
+  <button
+    onClick={onClick}
+    className="w-full p-4 rounded-lg bg-white text-left hover:shadow-md transition-all transform hover:-translate-y-1"
+  >
+    <div className="flex items-center gap-3">
+      <Icon className="w-6 h-6" style={{ color: iconColor }} />
+      <div>
+        <p className="font-semibold text-[#4A4A4A]">{title}</p>
+        <p className="text-sm text-gray-600">{desc}</p>
+      </div>
+    </div>
+  </button>
+);
+
+const StoryCard = ({ story }) => (
+  <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition">
+    <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 overflow-hidden">
+      {story.coverImage ? (
+        <img
+          src={story.coverImage}
+          alt={story.title}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-400">
+          No Image
+        </div>
+      )}
+    </div>
+    <h3 className="font-semibold mb-1 text-[#4A4A4A] truncate">
+      {story.title}
+    </h3>
+    <p className="text-sm text-gray-600">{story.category}</p>
+  </div>
+);
 
 export default ParentDashboard;
