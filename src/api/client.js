@@ -4,7 +4,7 @@ const API_URL = "https://torytime-backend.onrender.com/api";
 const LOCAL_API_URL = "http://127.0.0.1:8000/api";
 
 const apiClient = axios.create({
-  baseURL: LOCAL_API_URL,
+  baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
