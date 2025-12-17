@@ -46,6 +46,7 @@ const StoryReadingPage = ({ activeProfile }) => {
 
               if (audioRes.data.audio_url) {
                 // Found Parent Audio
+                console.log("Custom audio found for story");
                 const fullUrl = audioRes.data.audio_url.startsWith("http")
                   ? audioRes.data.audio_url
                   : `http://localhost:8000${audioRes.data.audio_url}`;

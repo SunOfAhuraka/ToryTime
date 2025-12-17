@@ -244,7 +244,7 @@ const ParentDashboard = () => {
                   desc="Write a personalized tale"
                 />
                 <ActionCard
-                  onClick={() => alert("Recording Studio coming soon!")}
+                  onClick={() => navigate("/dashboard/studio")} // <--- UPDATE THIS LINE
                   icon={Mic}
                   iconColor="#5EC4D0"
                   title="Recording Studio"

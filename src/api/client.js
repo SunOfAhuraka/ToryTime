@@ -1,9 +1,10 @@
 import axios from "axios";
 
 const API_URL = "https://torytime-backend.onrender.com/api";
+const LOCAL_API_URL = "http://127.0.0.1:8000/api";
 
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: LOCAL_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -48,7 +49,9 @@ export const api = {
 
   uploadRecording: (formData) =>
     apiClient.post("/recordings/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: {
+        "Content-Type": undefined,
+      },
     }),
 
   checkAudio: (storyId, childId) =>

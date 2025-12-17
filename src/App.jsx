@@ -14,6 +14,7 @@ import ChildLibraryView from "./pages/child/ChildLibraryView";
 import StoryReadingPage from "./pages/child/StoryReadingPage";
 import CustomStoryCreator from "./components/modals/CustomStoryCreator";
 import RegisterPage from "./pages/auth/RegisterPage";
+import RecordingStudio from "./pages/parent/RecordingStudio";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -126,6 +127,15 @@ const App = () => {
         element={
           <Protected>
             <ParentDashboard />
+          </Protected>
+        }
+      />
+
+      <Route
+        path="/dashboard/studio"
+        element={
+          <Protected>
+            <RecordingStudio />
           </Protected>
         }
       />
