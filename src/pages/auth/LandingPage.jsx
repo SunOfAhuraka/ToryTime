@@ -11,7 +11,7 @@ const LandingPage = () => {
       <div className="max-w-4xl w-full grid md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="text-6xl font-bold text-white mb-6 drop-shadow-sm">
-            StoryTime
+            ToryTime
           </h1>
           <p className="text-xl text-white/90 font-medium leading-relaxed">
             Where parents' voices bring stories to life. Create magical moments
