@@ -4,7 +4,7 @@ const API_URL = "https://torytime-backend.onrender.com/api";
 const LOCAL_API_URL = "http://127.0.0.1:8000/api";
 
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: LOCAL_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -53,6 +53,9 @@ export const api = {
         "Content-Type": undefined,
       },
     }),
+
+  // Fetch recordings with optional query params (e.g., { child_id })
+  getRecordings: (params) => apiClient.get("/recordings/", { params }),
 
   checkAudio: (storyId, childId) =>
     apiClient.get(
