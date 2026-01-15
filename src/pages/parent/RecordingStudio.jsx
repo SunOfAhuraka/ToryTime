@@ -154,7 +154,7 @@ const RecordingStudio = () => {
 
   return (
     <div className="min-h-screen bg-[#F6C7B6] p-4 md:p-8">
-      <div className="max-w-6xl mx-auto h-[90vh] flex flex-col">
+      <div className="max-w-6xl mx-auto flex flex-col min-h-screen">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -170,7 +170,7 @@ const RecordingStudio = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 flex-1 overflow-hidden">
+        <div className="grid md:grid-cols-3 gap-6 flex-1">
           {/* Left Panel: Story Selector */}
           <div className="bg-[#F7EDE2] rounded-3xl p-6 shadow-xl flex flex-col overflow-hidden">
             <h2 className="text-xl font-bold text-[#4A4A4A] mb-4">
