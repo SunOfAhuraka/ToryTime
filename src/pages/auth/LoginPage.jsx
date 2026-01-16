@@ -14,6 +14,10 @@ const LoginPage = ({ setIsAuthenticated, setIsAdmin }) => {
     try {
       const res = await api.login({ username, password });
       localStorage.setItem("access_token", res.data.access);
+      // Store refresh token if provided by backend
+      if (res.data.refresh) {
+        localStorage.setItem("refresh_token", res.data.refresh);
+      }
       setIsAuthenticated(true);
 
       // Check Admin status based on username for MVP or decoded token

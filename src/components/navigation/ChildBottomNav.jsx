@@ -1,9 +1,13 @@
 import React from "react";
 import { BookOpen, Headphones, Camera, Settings, LogOut } from "lucide-react";
+import { useSession } from "../../context/SessionContext";
 
 const ChildBottomNav = ({ activeTab, onTabChange }) => {
+  const { endSession } = useSession();
+
   const handleLogout = () => {
     if (window.confirm("Exit to profile selection?")) {
+      endSession();
       window.location.href = "/profiles";
     }
   };

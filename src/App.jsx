@@ -15,6 +15,8 @@ import StoryReadingPage from "./pages/child/StoryReadingPage";
 import CustomStoryCreator from "./components/modals/CustomStoryCreator";
 import RegisterPage from "./pages/auth/RegisterPage";
 import RecordingStudio from "./pages/parent/RecordingStudio";
+import SessionTimer from "./components/ui/SessionTimer";
+import { SessionProvider } from "./context/SessionContext";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,114 +59,117 @@ const App = () => {
   };
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route
-        path="/login"
-        element={
-          <LoginPage
-            setIsAuthenticated={setIsAuthenticated}
-            setIsAdmin={setIsAdmin}
-          />
-        }
-      />
-
-      <Route
-        path="/register"
-        element={
-          <RegisterPage
-            setIsAuthenticated={setIsAuthenticated}
-            setIsAdmin={setIsAdmin}
-          />
-        }
-      />
-
-      {/* Admin Routes */}
-      <Route
-        path="/admin"
-        element={
-          <Protected requireAdmin>
-            <AdminDashboard />
-          </Protected>
-        }
-      />
-      <Route
-        path="/admin/create"
-        element={
-          <Protected requireAdmin>
-            <CustomStoryCreator />
-          </Protected>
-        }
-      />
-      <Route
-        path="/admin/categories"
-        element={
-          <Protected requireAdmin>
-            <ManageCategoriesPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/admin/illustrations"
-        element={
-          <Protected requireAdmin>
-            <ManageIllustrationsPage />
-          </Protected>
-        }
-      />
-
-      {/* Parent/Child Routes */}
-      <Route
-        path="/profiles"
-        element={
-          <Protected>
-            <ProfileSelectionPage setActiveProfile={setActiveProfile} />
-          </Protected>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <Protected>
-            <ParentDashboard />
-          </Protected>
-        }
-      />
-
-      <Route
-        path="/dashboard/studio"
-        element={
-          <Protected>
-            <RecordingStudio />
-          </Protected>
-        }
-      />
-
-      {/* Child App */}
-      <Route
-        path="/app"
-        element={
-          <Protected>
-            <AppLayout />
-          </Protected>
-        }
-      >
-        <Route index element={<Navigate to="stories" replace />} />
+    <SessionProvider>
+      <SessionTimer />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route
-          path="stories"
-          element={<ChildLibraryView activeProfile={activeProfile} />}
+          path="/login"
+          element={
+            <LoginPage
+              setIsAuthenticated={setIsAuthenticated}
+              setIsAdmin={setIsAdmin}
+            />
+          }
         />
-      </Route>
 
-      <Route
-        path="/story/:id"
-        element={
-          <Protected>
-            <StoryReadingPage activeProfile={activeProfile} />
-          </Protected>
-        }
-      />
-    </Routes>
+        <Route
+          path="/register"
+          element={
+            <RegisterPage
+              setIsAuthenticated={setIsAuthenticated}
+              setIsAdmin={setIsAdmin}
+            />
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <Protected requireAdmin>
+              <AdminDashboard />
+            </Protected>
+          }
+        />
+        <Route
+          path="/admin/create"
+          element={
+            <Protected requireAdmin>
+              <CustomStoryCreator />
+            </Protected>
+          }
+        />
+        <Route
+          path="/admin/categories"
+          element={
+            <Protected requireAdmin>
+              <ManageCategoriesPage />
+            </Protected>
+          }
+        />
+        <Route
+          path="/admin/illustrations"
+          element={
+            <Protected requireAdmin>
+              <ManageIllustrationsPage />
+            </Protected>
+          }
+        />
+
+        {/* Parent/Child Routes */}
+        <Route
+          path="/profiles"
+          element={
+            <Protected>
+              <ProfileSelectionPage setActiveProfile={setActiveProfile} />
+            </Protected>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <Protected>
+              <ParentDashboard />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/dashboard/studio"
+          element={
+            <Protected>
+              <RecordingStudio />
+            </Protected>
+          }
+        />
+
+        {/* Child App */}
+        <Route
+          path="/app"
+          element={
+            <Protected>
+              <AppLayout />
+            </Protected>
+          }
+        >
+          <Route index element={<Navigate to="stories" replace />} />
+          <Route
+            path="stories"
+            element={<ChildLibraryView activeProfile={activeProfile} />}
+          />
+        </Route>
+
+        <Route
+          path="/story/:id"
+          element={
+            <Protected>
+              <StoryReadingPage activeProfile={activeProfile} />
+            </Protected>
+          }
+        />
+      </Routes>
+    </SessionProvider>
   );
 };
 
