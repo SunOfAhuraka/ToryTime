@@ -10,6 +10,7 @@ const ChildLibraryView = ({ activeProfile }) => {
   const [stories, setStories] = useState([]);
   const [recordings, setRecordings] = useState([]);
   const [tab, setTab] = useState("read");
+  const [categorySearch, setCategorySearch] = useState("");
 
   useEffect(() => {
     api
@@ -77,35 +78,53 @@ const ChildLibraryView = ({ activeProfile }) => {
           </div>
         </header>
 
+        {/* Search by Category */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search by category (e.g., Honesty, Integrity)... "
+            value={categorySearch}
+            onChange={(e) => setCategorySearch(e.target.value.toLowerCase())}
+            className="w-full px-4 py-3 rounded-lg border-2 border-white focus:border-brand-primary outline-none bg-white/90 font-medium"
+          />
+        </div>
+
         {tab === "read" && (
           <div className="grid md:grid-cols-2 gap-6">
-            {stories.map((story) => (
-              <Card
-                key={story.id}
-                className="p-0 overflow-hidden group cursor-pointer hover:scale-105 transition duration-300"
-                onClick={() => navigate(`/story/${story.id}`)}
-              >
-                <div className="h-48 bg-gray-200">
-                  {/* Placeholder logic for missing images */}
-                  {story.cover_image ? (
-                    <img
-                      src={story.cover_image}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-3xl bg-white">
-                      📖
-                    </div>
-                  )}
-                </div>
-                <div className="p-5">
-                  <h3 className="text-xl font-bold text-brand-text mb-2">
-                    {story.title}
-                  </h3>
-                  <Button className="w-full">Read Now</Button>
-                </div>
-              </Card>
-            ))}
+            {stories
+              .filter(
+                (story) =>
+                  !categorySearch ||
+                  (story.category &&
+                    story.category.toLowerCase().includes(categorySearch)),
+              )
+              .map((story) => (
+                <Card
+                  key={story.id}
+                  className="p-0 overflow-hidden group cursor-pointer hover:scale-105 transition duration-300"
+                  onClick={() => navigate(`/story/${story.id}`)}
+                >
+                  <div className="h-48 bg-gray-200">
+                    {/* Placeholder logic for missing images */}
+                    {story.cover_image ? (
+                      <img
+                        src={story.cover_image}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-3xl bg-white">
+                        📖
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-xl font-bold text-brand-text mb-2">
+                      {story.title}
+                    </h3>
+                    <Button className="w-full">Read Now</Button>
+                  </div>
+                </Card>
+              ))}
           </div>
         )}
         {tab === "listen" && (

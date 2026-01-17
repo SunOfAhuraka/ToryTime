@@ -29,6 +29,7 @@ const ParentDashboard = () => {
   const [showStoryCreator, setShowStoryCreator] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [categorySearch, setCategorySearch] = useState("");
 
   // 1. Fetch Data
   const loadDashboardData = async () => {
@@ -284,11 +285,30 @@ const ParentDashboard = () => {
               </button>
             </div>
 
+            {/* Search by Category */}
+            <div className="mb-6">
+              <input
+                type="text"
+                placeholder="Search by category (e.g., Honesty, Integrity)... "
+                value={categorySearch}
+                onChange={(e) =>
+                  setCategorySearch(e.target.value.toLowerCase())
+                }
+                className="w-full px-4 py-3 rounded-lg border-2 outline-none focus:border-[#F28C38] bg-white"
+                style={{ borderColor: "#5EC4D0" }}
+              />
+            </div>
+
             <div className="grid md:grid-cols-3 gap-4 mb-8">
               {customStories.length > 0 ? (
-                customStories.map((story) => (
-                  <StoryCard key={story.id} story={story} />
-                ))
+                customStories
+                  .filter(
+                    (story) =>
+                      !categorySearch ||
+                      (story.category &&
+                        story.category.toLowerCase().includes(categorySearch)),
+                  )
+                  .map((story) => <StoryCard key={story.id} story={story} />)
               ) : (
                 <div className="col-span-3 text-center py-8 text-gray-500">
                   No custom stories yet.
@@ -300,9 +320,16 @@ const ParentDashboard = () => {
               Global Library
             </h2>
             <div className="grid md:grid-cols-3 gap-4">
-              {globalStories.map((story) => (
-                <StoryCard key={story.id} story={story} />
-              ))}
+              {globalStories
+                .filter(
+                  (story) =>
+                    !categorySearch ||
+                    (story.category &&
+                      story.category.toLowerCase().includes(categorySearch)),
+                )
+                .map((story) => (
+                  <StoryCard key={story.id} story={story} />
+                ))}
             </div>
           </div>
         )}
