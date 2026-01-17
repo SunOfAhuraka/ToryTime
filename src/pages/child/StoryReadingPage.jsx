@@ -183,7 +183,17 @@ const StoryReadingPage = ({ activeProfile }) => {
             >
               {story.title}
             </h1>
-            <p className="text-gray-600 mb-4">by {story.author}</p>
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-gray-600">by {story.author}</p>
+              {story.category && (
+                <span
+                  className="px-3 py-1 rounded-full text-sm font-semibold text-white"
+                  style={{ backgroundColor: "#5EC4D0" }}
+                >
+                  {story.category}
+                </span>
+              )}
+            </div>
 
             {hasCustomRecording && (
               <div
