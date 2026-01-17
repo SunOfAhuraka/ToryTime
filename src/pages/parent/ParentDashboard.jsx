@@ -58,8 +58,13 @@ const ParentDashboard = () => {
       setCustomStories(myStories);
       setGlobalStories(libraryStories);
 
+      // Fetch Quiz Results for children
+      const quizResultsRes = await api.getQuizResults();
+      const results = quizResultsRes.data || [];
+      setQuizScores(results);
+
       if (profile.quizScores) {
-        setQuizScores(profile.quizScores);
+        setQuizScores((prev) => [...prev, ...profile.quizScores]);
       }
     } catch (error) {
       console.error("Failed to load dashboard data", error);
@@ -331,9 +336,46 @@ const ParentDashboard = () => {
                   </h3>
                 </div>
 
-                <p className="text-sm text-gray-500">
-                  No recent activity recorded.
-                </p>
+                {/* Get child's quiz results */}
+                {Array.isArray(quizScores) && quizScores.length > 0 ? (
+                  <div className="space-y-3">
+                    {quizScores
+                      .filter((result) => result.child === child.id)
+                      .sort(
+                        (a, b) =>
+                          new Date(b.date_taken) - new Date(a.date_taken),
+                      )
+                      .slice(0, 5) // Show last 5 results
+                      .map((result, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 bg-gray-50 rounded-lg flex justify-between items-center"
+                        >
+                          <div>
+                            <p className="font-semibold text-[#4A4A4A]">
+                              {result.story_title || `Story ${result.story}`}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(result.date_taken).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-[#F28C38]">
+                              {result.score}/{result.total_questions}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {Math.round(
+                                (result.score / result.total_questions) * 100,
+                              )}
+                              %
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No quiz results yet.</p>
+                )}
               </div>
             ))}
           </div>

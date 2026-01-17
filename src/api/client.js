@@ -95,7 +95,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export const api = {
@@ -133,8 +133,14 @@ export const api = {
 
   checkAudio: (storyId, childId) =>
     apiClient.get(
-      `/recordings/check_audio/?story_id=${storyId}&child_id=${childId}`
+      `/recordings/check_audio/?story_id=${storyId}&child_id=${childId}`,
     ),
+
+  // Quiz Results
+  saveQuizResult: (data) => apiClient.post("/quiz-results/", data),
+  getQuizResults: (params) => apiClient.get("/quiz-results/", { params }),
+  getChildQuizResults: (childId) =>
+    apiClient.get(`/quiz-results/?child_id=${childId}`),
 };
 
 export default apiClient;

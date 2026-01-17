@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Award, Check, X, ArrowRight, RotateCcw } from "lucide-react";
 
-const QuizView = ({ story, onComplete, onBack }) => {
+const QuizView = ({ story, onComplete, onBack, childProfile }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -71,7 +71,7 @@ const QuizView = ({ story, onComplete, onBack }) => {
             Score: {score} / {quiz.length}
           </p>
           <button
-            onClick={onComplete}
+            onClick={() => onComplete(score, quiz.length)}
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-bold"
           >
             Finish

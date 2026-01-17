@@ -101,6 +101,23 @@ const StoryReadingPage = ({ activeProfile }) => {
     navigate("/app/stories");
   };
 
+  const handleQuizComplete = async (score, totalQuestions) => {
+    try {
+      // Save quiz result
+      await api.saveQuizResult({
+        child: activeProfile.id,
+        story: story.id,
+        score: score,
+        total_questions: totalQuestions,
+      });
+      console.log("Quiz result saved successfully");
+    } catch (error) {
+      console.error("Failed to save quiz result:", error);
+    }
+    // Navigate back after saving
+    onBack();
+  };
+
   if (loading) {
     return (
       <div
@@ -127,7 +144,8 @@ const StoryReadingPage = ({ activeProfile }) => {
     return (
       <QuizView
         story={story}
-        onComplete={onBack}
+        childProfile={activeProfile}
+        onComplete={handleQuizComplete}
         onBack={() => setShowQuiz(false)}
       />
     );
