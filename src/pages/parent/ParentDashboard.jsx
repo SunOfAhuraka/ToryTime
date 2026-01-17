@@ -49,10 +49,10 @@ const ParentDashboard = () => {
 
       // Filter Stories (Logic: Author is Me vs Author is Admin/Others)
       const myStories = allStories.filter(
-        (s) => s.author === profile.name || s.category === "Personal"
+        (s) => s.author === profile.name || s.category === "Personal",
       );
       const libraryStories = allStories.filter(
-        (s) => s.author !== profile.name && s.category !== "Personal"
+        (s) => s.author !== profile.name && s.category !== "Personal",
       );
 
       setCustomStories(myStories);
@@ -84,15 +84,13 @@ const ParentDashboard = () => {
     navigate("/app/stories");
   };
 
-  // --- FIX IS HERE ---
-  // The modal handles the API call. We just need to reload the list when it's done.
   const handleChildAdded = async () => {
-    await loadDashboardData(); // Refresh the list from backend
+    await loadDashboardData();
     setShowAddChild(false);
   };
 
   const handleStorySaved = async () => {
-    await loadDashboardData(); // Refresh the list from backend
+    await loadDashboardData();
     setShowStoryCreator(false);
   };
 
@@ -244,7 +242,7 @@ const ParentDashboard = () => {
                   desc="Write a personalized tale"
                 />
                 <ActionCard
-                  onClick={() => navigate("/dashboard/studio")} // <--- UPDATE THIS LINE
+                  onClick={() => navigate("/dashboard/studio")}
                   icon={Mic}
                   iconColor="#5EC4D0"
                   title="Recording Studio"
@@ -332,7 +330,7 @@ const ParentDashboard = () => {
                     {child.name}
                   </h3>
                 </div>
-                {/* Mock progress logic - replace with real score mapping */}
+
                 <p className="text-sm text-gray-500">
                   No recent activity recorded.
                 </p>
@@ -342,17 +340,17 @@ const ParentDashboard = () => {
         )}
       </div>
 
-      {/* Modals with CORRECT props */}
       {showAddChild && (
         <AddChildModal
           onClose={() => setShowAddChild(false)}
-          onChildAdded={handleChildAdded} // <--- FIXED: Matching the prop name in AddChildModal
+          onChildAdded={handleChildAdded}
         />
       )}
       {showStoryCreator && (
         <CustomStoryCreator
+          parentName={parentName}
           onClose={() => setShowStoryCreator(false)}
-          onSave={handleStorySaved} // Ensures list refresh after creation
+          onSave={handleStorySaved}
         />
       )}
     </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { api } from "../../api/client"; // Import your API client
 
-const CustomStoryCreator = ({ onClose, onSave }) => {
+const CustomStoryCreator = ({ parentName, onClose, onSave }) => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Personal");
   const [ageRange, setAgeRange] = useState("4-7");
@@ -38,15 +38,23 @@ const CustomStoryCreator = ({ onClose, onSave }) => {
     if (title && script) {
       setLoading(true);
 
+      const quizData = quiz
+        .filter((q) => q.question && q.options[0])
+        .map((q) => ({
+          question: q.question,
+          options: q.options,
+          correct_answer_index: q.correctAnswer,
+        }));
+
       const storyData = {
         title,
+        author: parentName || "Parent",
         category,
-        age_range: ageRange, // Matches Django field name
+        age_range: ageRange,
         script,
-        cover_image: null, // Or send base64 string if you implement file picker
+        cover_image: null,
         duration: "5 min",
-        // Filter out empty questions before sending
-        quiz: quiz.filter((q) => q.question && q.options[0]),
+        quiz: quizData,
       };
 
       try {
@@ -170,7 +178,7 @@ const CustomStoryCreator = ({ onClose, onSave }) => {
                     <div key={oIndex} className="flex items-center gap-2">
                       <input
                         type="radio"
-                        name={`correct-${qIndex}`} // Unique group name per question
+                        name={`correct-${qIndex}`}
                         checked={q.correctAnswer === oIndex}
                         onChange={() =>
                           updateQuizQuestion(qIndex, "correctAnswer", oIndex)

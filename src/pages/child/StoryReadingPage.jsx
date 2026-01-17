@@ -41,7 +41,7 @@ const StoryReadingPage = ({ activeProfile }) => {
             try {
               const audioRes = await api.checkAudio(
                 currentStory.id,
-                activeProfile.id
+                activeProfile.id,
               );
 
               if (audioRes.data.audio_url) {
