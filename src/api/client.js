@@ -110,7 +110,13 @@ export const api = {
       const res = await apiClient.get("/users/me/");
       return res.data;
     } catch (e) {
-      return { is_staff: localStorage.getItem("user_role") === "admin" };
+      console.error("Profile fetch failed:", e);
+      // Return fallback with a default ID
+      return {
+        id: 1, // Default fallback
+        is_staff: localStorage.getItem("user_role") === "admin",
+        name: "Parent",
+      };
     }
   },
 

@@ -19,6 +19,7 @@ const ParentDashboard = () => {
 
   // Data State
   const [parentName, setParentName] = useState("");
+  const [parentId, setParentId] = useState(null);
   const [children, setChildren] = useState([]);
   const [customStories, setCustomStories] = useState([]);
   const [globalStories, setGlobalStories] = useState([]);
@@ -39,6 +40,7 @@ const ParentDashboard = () => {
       // Fetch Profile
       const profile = await api.getProfile();
       setParentName(profile.name || "Parent");
+      setParentId(profile.id); // Store parent ID
 
       // Fetch Children
       const childrenRes = await api.getChildren();
@@ -48,12 +50,12 @@ const ParentDashboard = () => {
       const storiesRes = await api.getStories();
       const allStories = storiesRes.data;
 
-      // Filter Stories (Logic: Author is Me vs Author is Admin/Others)
-      const myStories = allStories.filter(
-        (s) => s.author === profile.name || s.category === "Personal",
-      );
+      // Filter Stories by created_by field:
+      // Custom stories: created_by === current parent's ID
+      // Global stories: created_by === null (created by admin)
+      const myStories = allStories.filter((s) => s.created_by === profile.id);
       const libraryStories = allStories.filter(
-        (s) => s.author !== profile.name && s.category !== "Personal",
+        (s) => s.created_by === null || s.created_by === undefined,
       );
 
       setCustomStories(myStories);
