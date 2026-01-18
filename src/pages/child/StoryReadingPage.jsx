@@ -103,9 +103,26 @@ const StoryReadingPage = ({ activeProfile }) => {
 
   const handleQuizComplete = async (score, totalQuestions) => {
     try {
+      // Get active profile - check prop first, then localStorage as fallback
+      let childId = activeProfile?.id;
+
+      if (!childId) {
+        const savedProfile = localStorage.getItem("active_profile");
+        if (savedProfile) {
+          const profile = JSON.parse(savedProfile);
+          childId = profile.id;
+        }
+      }
+
+      if (!childId || !story.id) {
+        console.warn("Missing child ID or story ID, skipping quiz result save");
+        onBack();
+        return;
+      }
+
       // Save quiz result
       await api.saveQuizResult({
-        child: activeProfile.id,
+        child: childId,
         story: story.id,
         score: score,
         total_questions: totalQuestions,

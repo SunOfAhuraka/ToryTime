@@ -62,9 +62,13 @@ const ParentDashboard = () => {
       setGlobalStories(libraryStories);
 
       // Fetch Quiz Results for children
-      const quizResultsRes = await api.getQuizResults();
-      const results = quizResultsRes.data || [];
-      setQuizScores(results);
+      try {
+        const quizResultsRes = await api.getQuizResults();
+        const results = quizResultsRes.data || [];
+        setQuizScores(results);
+      } catch (quizError) {
+        setQuizScores([]);
+      }
 
       if (profile.quizScores) {
         setQuizScores((prev) => [...prev, ...profile.quizScores]);
